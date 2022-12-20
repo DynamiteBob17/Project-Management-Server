@@ -59,7 +59,7 @@ module.exports = function (app, pool) {
 
                         const token = jwt.sign(
                             {
-                                userId: user.user_id,
+                                user_id: user.user_id,
                                 username: user.username,
                                 email: user.email
                             },
