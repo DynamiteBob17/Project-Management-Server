@@ -2,11 +2,11 @@ const jwt = require("jsonwebtoken");
 
 module.exports = async (request, response, next) => {
     try {
+        const currUserId = await request.headers.authorization.split(" ")[0];
         const token = await request.headers.authorization.split(" ")[1];
-        const user_id = await request.headers.authorization.split(" ")[2];
         const user = jwt.verify(token, "RANDOM_TOKEN");
 
-        if (parseInt(user_id) !== parseInt(user.user_id)) {
+        if (parseInt(currUserId) !== parseInt(user.user_id)) {
             throw "Invalid user ID";
         }
 
