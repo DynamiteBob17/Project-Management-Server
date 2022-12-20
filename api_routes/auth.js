@@ -7,9 +7,7 @@ module.exports = async (request, response, next) => {
         const user = jwt.verify(token, "RANDOM_TOKEN");
 
         if (user_id !== user.user_id) {
-            return response.status(401).json({
-                error: new Error("Invalid request!"),
-            });
+            throw "Invalid user ID";
         }
 
         request.user = user;
