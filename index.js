@@ -13,10 +13,15 @@ app.get('/', (req, res) => {
     res.status(200).send({ message: 'health check: api is up and running' });
 });
 
+const corsOptions = {
+    origin: 'https://pm-pej33.firebaseapp.com',
+    optionsSuccessStatus: 200
+}
+app.get('secure', cors(corsOptsion), (req, res) => {
+    res.status(200).send({ message: 'secure route' });
+});
+
 const routes = require('./api_routes/routes');
-app.use(cors({
-    origin: 'https://pm-pej33.firebaseapp.com'
-}));
 routes(app);
 
 app.listen(port, () => {
