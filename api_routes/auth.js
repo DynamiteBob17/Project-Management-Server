@@ -6,7 +6,7 @@ module.exports = async (request, response, next) => {
         const user_id = await request.headers.authorization.split(" ")[2];
         const user = jwt.verify(token, "RANDOM_TOKEN");
 
-        if (user_id !== user.user_id) {
+        if (parseInt(user_id) !== parseInt(user.user_id)) {
             throw "Invalid user ID";
         }
 
