@@ -59,7 +59,7 @@ module.exports = function (app, pool) {
 
     // get all users for a project
     app.get('/api/project/members/:project_id', (req, res) => {
-        const project_id = req.params.project_id;
+        const project_id = parseInt(req.params.project_id);
 
         pool.query(
             'SELECT app_user.user_id, email, username, is_owner, is_admin FROM app_user INNER JOIN project_member ON app_user.user_id = project_member.user_id WHERE project_id = $1',
@@ -173,7 +173,8 @@ module.exports = function (app, pool) {
 
     // check if a user is an admin and owner of a project
     app.get('/api/project/member/admin/:project_id/:user_id', (req, res) => {
-        const { project_id, user_id } = req.params;
+        const project_id = parseInt(req.params.project_id);
+        const user_id = parseInt(req.params.user_id);
 
         pool.query(
             'SELECT is_admin, is_owner FROM project_member WHERE project_id = $1 AND user_id = $2',
@@ -198,7 +199,8 @@ module.exports = function (app, pool) {
 
     // remove a user from a project
     app.delete('/api/project/member/:project_id/:user_id', (req, res) => {
-        const { project_id, user_id } = req.params;
+        const project_id = parseInt(req.params.project_id);
+        const user_id = parseInt(req.params.user_id);
 
         pool.query(
             'SELECT is_owner, is_admin, user_id FROM project_member WHERE project_id = $1',
@@ -227,21 +229,18 @@ module.exports = function (app, pool) {
                         })
                         .catch(error => {
                             res.status(500).send({
-                                message: 'Error while removing user from project!',
-                                info: [project_id, user_id]
+                                message: 'Error while removing user from project!'
                             });
                         });
                 } else {
                     res.status(400).send({
                         message: 'Error while removing user from project!',
-                        info: [project_id, user_id]
                     });
                 }
             })
             .catch(error => {
                 res.status(500).send({
-                    message: 'Error while removing user from project!',
-                    info: [project_id, user_id]
+                    message: 'Error while removing user from project!'
                 });
             });
     });
@@ -250,7 +249,7 @@ module.exports = function (app, pool) {
 
     // delete a project
     app.delete('/api/project/:project_id', (req, res) => {
-        const project_id = req.params.project_id;
+        const project_id = parseInt(req.params.project_id);
 
         pool.query(
             'SELECT is_owner FROM project_member WHERE project_id = $1 AND user_id = $2',
