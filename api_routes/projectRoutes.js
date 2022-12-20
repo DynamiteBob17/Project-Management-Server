@@ -222,8 +222,7 @@ module.exports = function (app, pool) {
                     )
                         .then(result => {
                             res.status(200).send({
-                                message: 'User removed from project successfully!',
-                                user_id: result.rows[0].user_id
+                                message: 'User removed from project successfully!'
                             });
                         })
                         .catch(error => {
