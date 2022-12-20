@@ -217,7 +217,7 @@ module.exports = function (app, pool) {
                     || (userMakingRequest.is_admin && !userToRemove.is_admin && !userToRemove.is_owner)
                     || (req.user.user_id === user_id)) {
                     pool.query(
-                        'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2 AND RETURNING user_id',
+                        'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2',
                         [project_id, user_id]
                     )
                         .then(result => {
