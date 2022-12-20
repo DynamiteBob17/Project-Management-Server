@@ -86,31 +86,47 @@ module.exports = function (app, pool) {
         const { project_id, username } = req.body;
 
         pool.query(
-            'SELECT user_id FROM app_user WHERE username = $1',
-            [username]
+            'SELECT is_admin FROM project_member WHERE project_id = $1 AND user_id = $2',
+            [project_id, req.user.user_id]
         )
             .then(result => {
-                pool.query(
-                    'INSERT INTO project_member (project_id, user_id) VALUES ($1, $2)',
-                    [project_id, result.rows[0].user_id]
-                )
-                    .then(result => {
-                        res.status(201).send({
-                            message: 'User added to project successfully!'
-                        });
-                    })
-                    .catch(error => {
-                        res.status(500).send({
-                            message: 'Error while adding user to project!',
-                            error
-                        });
+                if (result.rows.length === 0) {
+                    res.status(400).send({
+                        message: 'You are not a member of this project!'
                     });
-            })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while adding user to project!',
-                    error
-                });
+                } else if (!result.rows[0].is_admin) {
+                    res.status(400).send({
+                        message: 'You are not an admin of this project!'
+                    });
+                } else {
+                    pool.query(
+                        'SELECT user_id FROM app_user WHERE username = $1',
+                        [username]
+                    )
+                        .then(result => {
+                            pool.query(
+                                'INSERT INTO project_member (project_id, user_id) VALUES ($1, $2)',
+                                [project_id, result.rows[0].user_id]
+                            )
+                                .then(result => {
+                                    res.status(201).send({
+                                        message: 'User added to project successfully!'
+                                    });
+                                })
+                                .catch(error => {
+                                    res.status(500).send({
+                                        message: 'Error while adding user to project!',
+                                        error
+                                    });
+                                });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while adding user to project!',
+                                error
+                            });
+                        });
+                }
             });
     });
 
@@ -121,19 +137,35 @@ module.exports = function (app, pool) {
         const { project_id, user_id } = req.body;
 
         pool.query(
-            'UPDATE project_member SET is_admin = true WHERE project_id = $1 AND user_id = $2',
-            [project_id, user_id]
+            'SELECT is_admin FROM project_member WHERE project_id = $1 AND user_id = $2',
+            [project_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'User made admin successfully!'
-                });
-            })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while making user admin!',
-                    error
-                });
+                if (result.rows.length === 0) {
+                    res.status(400).send({
+                        message: 'You are not a member of this project!'
+                    });
+                } else if (!result.rows[0].is_admin) {
+                    res.status(400).send({
+                        message: 'You are not an admin of this project!'
+                    });
+                } else {
+                    pool.query(
+                        'UPDATE project_member SET is_admin = true WHERE project_id = $1 AND user_id = $2',
+                        [project_id, user_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'User made admin successfully!'
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while making user admin!',
+                                error
+                            });
+                        });
+                }
             });
     });
 
@@ -169,14 +201,41 @@ module.exports = function (app, pool) {
         const { project_id, user_id } = req.params;
 
         pool.query(
-            'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2 AND is_owner = false RETURNING user_id',
-            [project_id, user_id]
+            'SELECT is_owner, is_admin, user_id FROM project_member WHERE project_id = $1',
+            [project_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'User removed from project successfully!',
-                    user_id: result.rows[0].user_id
-                });
+                const owner = result.rows.find(member => member.is_owner);
+                const userMakingRequest = result.rows.find(member => member.user_id === req.user.user_id);
+                const userToRemove = result.rows.find(member => member.user_id === user_id);
+
+                if (owner.user_id === user_id) {
+                    res.status(400).send({
+                        message: 'Cannot remove owner of project!'
+                    });
+                } else if (userMakingRequest.is_owner // already checked if owner is trying to remove themselves, owner can remove anyone
+                    || (userMakingRequest.is_admin && !userToRemove.is_admin && !userToRemove.is_owner)) {
+                    pool.query(
+                        'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2 AND is_owner = false RETURNING user_id',
+                        [project_id, user_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'User removed from project successfully!',
+                                user_id: result.rows[0].user_id
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while removing user from project!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(400).send({
+                        message: 'Error while removing user from project!'
+                    });
+                }
             })
             .catch(error => {
                 res.status(500).send({
@@ -193,20 +252,36 @@ module.exports = function (app, pool) {
         const project_id = req.params.project_id;
 
         pool.query(
-            'DELETE FROM project WHERE project_id = $1 RETURNING project_name',
-            [project_id]
+            'SELECT is_owner FROM project_member WHERE project_id = $1 AND user_id = $2',
+            [project_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'Project deleted successfully!',
-                    project_name: result.rows[0].project_name
-                });
-            })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while deleting project!',
-                    error
-                });
+                if (result.rows.length === 0) {
+                    res.status(400).send({
+                        message: 'You are not a member of this project!'
+                    });
+                } else if (!result.rows[0].is_owner) {
+                    res.status(400).send({
+                        message: 'You are not the owner of this project!'
+                    });
+                } else {
+                    pool.query(
+                        'DELETE FROM project WHERE project_id = $1 RETURNING project_id',
+                        [project_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Project deleted successfully!',
+                                project_id: result.rows[0].project_id
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while deleting project!',
+                                error
+                            });
+                        });
+                }
             });
     });
 

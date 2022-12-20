@@ -20,21 +20,33 @@ module.exports = function (app, pool) {
             SELECT * FROM ins1;`;
         
         pool.query(
-            insertQuery,
-            [task_name, task_description, task_priority, task_due_date, project_id, user_id]
+            'SELECT is_admin FROM project_member WHERE project_id = $1 AND user_id = $2',
+            [project_id, req.user.user_id]
         )
             .then(result => {
-                res.status(201).send({
-                    message: 'Task created successfully!',
-                    task: result.rows[0]
-                });
+                if (result.rows[0].is_admin) {
+                    pool.query(
+                        insertQuery,
+                        [task_name, task_description, task_priority, task_due_date, project_id, user_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Task created successfully!',
+                                task: result.rows[0]
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while creating task!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to create a task!'
+                    });
+                }
             })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while creating task!',
-                    error
-                });
-            });
     });
 
 
@@ -117,21 +129,33 @@ module.exports = function (app, pool) {
         const { task_id } = req.body;
 
         pool.query(
-            'UPDATE task SET task_completed_date = CURRENT_TIMESTAMP, task_status = $1 WHERE task_id = $2 RETURNING *',
-            ['Completed', task_id]
+            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
+            [task_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'Task completed successfully!',
-                    task: result.rows[0]
-                });
+                if (result.rows[0].is_admin) {
+                    pool.query(
+                        'UPDATE task SET task_completed = true WHERE task_id = $1 RETURNING *',
+                        [task_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Task completed successfully!',
+                                task: result.rows[0]
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while completing task!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to complete a task!'
+                    });
+                }
             })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while completing task!',
-                    error
-                });
-            });
     });
 
 
@@ -141,21 +165,33 @@ module.exports = function (app, pool) {
         const { task_id, user_id } = req.body;
 
         pool.query(
-            'INSERT INTO task_member (task_id, user_id) VALUES ($1, $2) RETURNING *',
-            [task_id, user_id]
+            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
+            [task_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'Member added to task successfully!',
-                    task_member: result.rows[0]
-                });
+                if (result.rows[0].is_admin) {
+                    pool.query(
+                        'INSERT INTO task_member (task_id, user_id) VALUES ($1, $2) RETURNING *',
+                        [task_id, user_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Member added to task successfully!',
+                                task_member: result.rows[0]
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while adding member to task!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to add a member to a task!'
+                    });
+                }
             })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while adding member to task!',
-                    error
-                });
-            });
     });
 
 
@@ -165,21 +201,33 @@ module.exports = function (app, pool) {
         const { task_id, user_id } = req.params;
 
         pool.query(
-            'DELETE FROM task_member WHERE task_id = $1 AND user_id = $2 RETURNING user_id',
-            [task_id, user_id]
+            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
+            [task_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'Member removed from task successfully!',
-                    user_id: result.rows[0].user_id
-                });
+                if (result.rows[0].is_admin) {
+                    pool.query(
+                        'DELETE FROM task_member WHERE task_id = $1 AND user_id = $2 RETURNING *',
+                        [task_id, user_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Member removed from task successfully!',
+                                task_member: result.rows[0]
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while removing member from task!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to remove a member from a task!'
+                    });
+                }
             })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while removing member from task!',
-                    error
-                });
-            });
     });
 
 
@@ -238,21 +286,33 @@ module.exports = function (app, pool) {
         const comment_id = req.params.comment_id;
         
         pool.query(
-            'DELETE FROM task_comment WHERE comment_id = $1 RETURNING comment_id',
-            [comment_id]
+            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id INNER JOIN task_comment ON task.task_id = task_comment.task_id WHERE task_comment.comment_id = $1 AND project_member.user_id = $2',
+            [comment_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'Comment deleted successfully!',
-                    comment_id: result.rows[0].comment_id
-                });
+                if (result.rows[0].is_admin) {
+                    pool.query(
+                        'DELETE FROM task_comment WHERE comment_id = $1 RETURNING comment_id',
+                        [comment_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Comment deleted successfully!',
+                                comment_id: result.rows[0].comment_id
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while deleting comment!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to delete a comment!'
+                    });
+                }
             })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while deleting comment!',
-                    error
-                });
-            });
     });
 
 
@@ -262,21 +322,32 @@ module.exports = function (app, pool) {
         const task_id = req.params;
 
         pool.query(
-            'DELETE FROM task WHERE task_id = $1 RETURNING task_id',
-            [task_id]
+            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
+            [task_id, req.user.user_id]
         )
             .then(result => {
-                res.status(200).send({
-                    message: 'Task deleted successfully!',
-                    task_id: result.rows[0].task_id
-                });
+                if (result.rows[0].is_admin) {
+                    pool.query(
+                        'DELETE FROM task WHERE task_id = $1 RETURNING task_id',
+                        [task_id]
+                    )
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Task deleted successfully!',
+                                task_id: result.rows[0].task_id
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while deleting task!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to delete a task!'
+                    });
+                }
             })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while deleting task!',
-                    error
-                });
-            });
     });
-
 }
