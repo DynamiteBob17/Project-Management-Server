@@ -228,19 +228,20 @@ module.exports = function (app, pool) {
                         .catch(error => {
                             res.status(500).send({
                                 message: 'Error while removing user from project!',
-                                error
+                                info: [project_id, user_id]
                             });
                         });
                 } else {
                     res.status(400).send({
-                        message: 'Error while removing user from project!'
+                        message: 'Error while removing user from project!',
+                        info: [project_id, user_id]
                     });
                 }
             })
             .catch(error => {
                 res.status(500).send({
                     message: 'Error while removing user from project!',
-                    error
+                    info: [project_id, user_id]
                 });
             });
     });
