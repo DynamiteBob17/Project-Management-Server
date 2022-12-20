@@ -17,7 +17,7 @@ const corsOptions = {
     origin: 'https://pm-pej33.firebaseapp.com',
     optionsSuccessStatus: 200
 }
-app.get('/secure', cors(corsOptsion), (req, res) => {
+app.get('/secure', cors(corsOptions), (req, res) => {
     res.status(200).send({ message: 'secure route' });
 });
 
