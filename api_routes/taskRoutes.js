@@ -9,6 +9,13 @@ module.exports = function (app, pool) {
             task_due_date,
             project_id,
          } = req.body;
+
+        if (['low', 'medium', 'high'].indexOf(task_priority) === -1) {
+            res.status(400).send({
+                message: 'Invalid task priority!'
+            });
+            return;
+        }
         const user_id = req.user.user_id;
 
         const insertQuery = `WITH ins1 AS (
