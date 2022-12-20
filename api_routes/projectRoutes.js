@@ -215,9 +215,9 @@ module.exports = function (app, pool) {
                     });
                 } else if (userMakingRequest.is_owner // already checked if owner is trying to remove themselves, owner can remove anyone
                     || (userMakingRequest.is_admin && !userToRemove.is_admin && !userToRemove.is_owner)
-                    || (userMakingRequest.user_id === user_id)) {
+                    || (req.user.user_id === user_id)) {
                     pool.query(
-                        'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2 AND is_owner = false RETURNING user_id',
+                        'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2 AND RETURNING user_id',
                         [project_id, user_id]
                     )
                         .then(result => {
