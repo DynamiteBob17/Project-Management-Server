@@ -167,6 +167,30 @@ module.exports = function (app, pool) {
 
 
 
+    // get all members for a task
+    app.get('/api/task/members/:task_id', (req, res) => {
+        const task_id = parseInt(req.params.task_id);
+
+        pool.query(
+            'SELECT * FROM app_user INNER JOIN task_member ON app_user.user_id = task_member.user_id WHERE task_member.task_id = $1',
+            [task_id]
+        )
+            .then(result => {
+                res.status(200).send({
+                    message: 'Members retrieved successfully!',
+                    members: result.rows
+                });
+            })
+            .catch(error => {
+                res.status(500).send({
+                    message: 'Error while retrieving members!',
+                    error
+                });
+            });
+    });
+
+
+
     // add a member to a task
     app.put('/api/task/member', (req, res) => {
         const { task_id, user_id } = req.body;
