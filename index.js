@@ -7,7 +7,6 @@ const helmet = require('helmet');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(cors());
 app.use(helmet());
 
 app.get('/', (req, res) => {
@@ -15,6 +14,9 @@ app.get('/', (req, res) => {
 });
 
 const routes = require('./api_routes/routes');
+app.use(cors({
+    origin: 'https://pm-pej33.firebaseapp.com'
+}));
 routes(app);
 
 app.listen(port, () => {
