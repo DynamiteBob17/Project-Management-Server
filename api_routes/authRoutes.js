@@ -1,5 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const auth = require('./auth');
 
 module.exports = function (app, pool) {
 
@@ -92,8 +93,8 @@ module.exports = function (app, pool) {
 
 
     // remove a user
-    app.delete('/api/user/:user_id', (req, res) => {
-        const user_id = req.params.user_id;
+    app.delete('/api/user', auth, (req, res) => {
+        const user_id = req.user.user_id;
 
         pool.query(
             'DELETE FROM app_user WHERE user_id = $1 RETURNING username',

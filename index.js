@@ -4,6 +4,7 @@ const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
 const helmet = require('helmet');
+const routes = require('./api_routes/routes');
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -14,7 +15,6 @@ app.get('/', (req, res) => {
     res.status(200).send({ message: 'health check: api is up and running' });
 });
 
-const routes = require('./api_routes/routes');
 routes(app);
 
 app.listen(port, () => {

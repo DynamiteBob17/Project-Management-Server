@@ -2,7 +2,9 @@ module.exports = function (app, pool) {
 
     // create a new project
     app.post('/api/project', (req, res) => {
-        const { project_name, user_id } = req.body;
+        const project_name = req.body.project_name;
+        const user_id = req.user.user_id;
+
         const insertQuery = `WITH ins1 AS (
             INSERT INTO project (project_name) VALUES ($1) RETURNING project_id, project_name
             ),
@@ -32,8 +34,8 @@ module.exports = function (app, pool) {
 
 
     // get all projects for a user
-    app.get('/api/projects/:user_id', (req, res) => {
-        const user_id = req.params.user_id;
+    app.get('/api/projects', (req, res) => {
+        const user_id = req.user.user_id;
 
         pool.query(
             'SELECT project_name, project.project_id FROM project INNER JOIN project_member ON project.project_id = project_member.project_id WHERE project_member.user_id = $1',
@@ -82,7 +84,7 @@ module.exports = function (app, pool) {
     // add a user to a project
     app.put('/api/project/member', (req, res) => {
         const { project_id, username } = req.body;
-        
+
         pool.query(
             'SELECT user_id FROM app_user WHERE username = $1',
             [username]
@@ -112,7 +114,7 @@ module.exports = function (app, pool) {
             });
     });
 
-    
+
 
     // make a user an admin
     app.put('/api/project/member/admin', (req, res) => {
@@ -134,7 +136,7 @@ module.exports = function (app, pool) {
                 });
             });
     });
-    
+
 
 
     // check if a user is an admin and owner of a project
@@ -170,7 +172,7 @@ module.exports = function (app, pool) {
             'DELETE FROM project_member WHERE project_id = $1 AND user_id = $2 AND is_owner = false RETURNING user_id',
             [project_id, user_id]
         )
-            .then(result => {  
+            .then(result => {
                 res.status(200).send({
                     message: 'User removed from project successfully!',
                     user_id: result.rows[0].user_id
@@ -178,7 +180,7 @@ module.exports = function (app, pool) {
             })
             .catch(error => {
                 res.status(500).send({
-                    message: 'Error while removing user from project!', 
+                    message: 'Error while removing user from project!',
                     error
                 });
             });

@@ -8,8 +8,8 @@ module.exports = function (app, pool) {
             task_priority,
             task_due_date,
             project_id,
-            user_id
          } = req.body;
+        const user_id = req.user.user_id;
 
         const insertQuery = `WITH ins1 AS (
             INSERT INTO task (task_name, task_description, task_priority, task_due_date, project_id) VALUES ($1, $2, $3, $4, $5) RETURNING task_id
@@ -64,8 +64,9 @@ module.exports = function (app, pool) {
 
 
     // get all tasks for a user
-    app.get('/api/user/tasks/:user_id/:project_id', (req, res) => {
-        const { user_id, project_id } = req.params;
+    app.get('/api/user/tasks/:project_id', (req, res) => {
+        const project_id = req.params.project_id;
+        const user_id = req.user.user_id;
 
         pool.query(
             'SELECT * FROM task INNER JOIN task_member ON task.task_id = task_member.task_id WHERE task_member.user_id = $1 AND task.project_id = $2',
@@ -185,7 +186,8 @@ module.exports = function (app, pool) {
 
     // post a comment on a task
     app.post('/api/task/comment', (req, res) => {
-        const { task_id, user_id, comment_text } = req.body;
+        const { task_id, comment_text } = req.body;
+        const user_id = req.user.user_id;
 
         pool.query(
             'INSERT INTO task_comment (task_id, user_id, comment_text) VALUES ($1, $2, $3) RETURNING *',
