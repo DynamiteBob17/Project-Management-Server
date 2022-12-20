@@ -19,7 +19,7 @@ module.exports = function (app, pool) {
         const user_id = req.user.user_id;
 
         const insertQuery = `WITH ins1 AS (
-            INSERT INTO task (task_name, task_description, task_priority, task_due_date, project_id) VALUES ($1, $2, $3, $4, $5) RETURNING task_id
+            INSERT INTO task (task_name, task_description, task_priority, task_due_date, project_id) VALUES ($1, $2, $3, $4, $5) RETURNING *
             ),
             ins2 AS (
                 INSERT INTO task_member (task_id, user_id) VALUES ((SELECT task_id FROM ins1), $6)
@@ -239,7 +239,7 @@ module.exports = function (app, pool) {
             })
     });
 
-    
+
 
     // remove a member from a task
     app.delete('/api/task/member/:task_id/:user_id', (req, res) => {
