@@ -203,6 +203,44 @@ module.exports = function (app, pool) {
 
 
 
+    // add multiple members to a task
+    app.put('/api/task/members', (req, res) => {
+        const { task_id, user_ids } = req.body;
+
+        pool.query(
+            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
+            [task_id, req.user.user_id]
+        )
+            .then(result => {
+                if (result.rows[0].is_admin) {
+                    const values = user_ids.map(user_id => {
+                        return `(${task_id}, ${user_id})`;
+                    });
+                    const query = `INSERT INTO task_member (task_id, user_id) VALUES ${values.join(',')} RETURNING *`;
+
+                    pool.query(query)
+                        .then(result => {
+                            res.status(200).send({
+                                message: 'Members added to task successfully!',
+                                task_members: result.rows
+                            });
+                        })
+                        .catch(error => {
+                            res.status(500).send({
+                                message: 'Error while adding members to task!',
+                                error
+                            });
+                        });
+                } else {
+                    res.status(401).send({
+                        message: 'You are not authorized to add members to a task!'
+                    });
+                }
+            })
+    });
+
+    
+
     // remove a member from a task
     app.delete('/api/task/member/:task_id/:user_id', (req, res) => {
         const task_id = parseInt(req.params.task_id);
