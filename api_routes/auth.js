@@ -3,8 +3,15 @@ const jwt = require("jsonwebtoken");
 module.exports = async (request, response, next) => {
     try {
         const token = await request.headers.authorization.split(" ")[1];
-        const decodedToken = await jwt.verify(token, "RANDOM_TOKEN");
-        const user = await decodedToken;
+        const user_id = await request.headers.authorization.split(" ")[2];
+        const user = jwt.verify(token, "RANDOM_TOKEN");
+
+        if (user_id !== user.user_id) {
+            return response.status(401).json({
+                error: new Error("Invalid request!"),
+            });
+        }
+
         request.user = user;
         next();
     } catch (error) {
