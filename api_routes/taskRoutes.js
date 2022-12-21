@@ -107,27 +107,27 @@ module.exports = function (app, pool) {
 
 
 
-    // get a task
-    app.get('/api/task/:task_id', (req, res) => {
-        const task_id = parseInt(req.params.task_id);
+    // // get a task
+    // app.get('/api/task/:task_id', (req, res) => {
+    //     const task_id = parseInt(req.params.task_id);
 
-        pool.query(
-            'SELECT * FROM task WHERE task_id = $1',
-            [task_id]
-        )
-            .then(result => {
-                res.status(200).send({
-                    message: 'Task retrieved successfully!',
-                    task: result.rows[0]
-                });
-            })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while retrieving task!',
-                    error
-                });
-            });
-    });
+    //     pool.query(
+    //         'SELECT * FROM task WHERE task_id = $1',
+    //         [task_id]
+    //     )
+    //         .then(result => {
+    //             res.status(200).send({
+    //                 message: 'Task retrieved successfully!',
+    //                 task: result.rows[0]
+    //             });
+    //         })
+    //         .catch(error => {
+    //             res.status(500).send({
+    //                 message: 'Error while retrieving task!',
+    //                 error
+    //             });
+    //         });
+    // });
 
 
 
@@ -389,37 +389,37 @@ module.exports = function (app, pool) {
 
 
 
-    // remove a task
-    app.delete('/api/task/:task_id', (req, res) => {
-        const task_id = parseInt(req.params.task_id);
+    // // remove a task
+    // app.delete('/api/task/:task_id', (req, res) => {
+    //     const task_id = parseInt(req.params.task_id);
 
-        pool.query(
-            'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
-            [task_id, req.user.user_id]
-        )
-            .then(result => {
-                if (result.rows[0].is_admin) {
-                    pool.query(
-                        'DELETE FROM task WHERE task_id = $1 RETURNING task_id',
-                        [task_id]
-                    )
-                        .then(result => {
-                            res.status(200).send({
-                                message: 'Task deleted successfully!',
-                                task_id: result.rows[0].task_id
-                            });
-                        })
-                        .catch(error => {
-                            res.status(500).send({
-                                message: 'Error while deleting task!',
-                                error
-                            });
-                        });
-                } else {
-                    res.status(401).send({
-                        message: 'You are not authorized to delete a task!'
-                    });
-                }
-            })
-    });
+    //     pool.query(
+    //         'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id WHERE task.task_id = $1 AND project_member.user_id = $2',
+    //         [task_id, req.user.user_id]
+    //     )
+    //         .then(result => {
+    //             if (result.rows[0].is_admin) {
+    //                 pool.query(
+    //                     'DELETE FROM task WHERE task_id = $1 RETURNING task_id',
+    //                     [task_id]
+    //                 )
+    //                     .then(result => {
+    //                         res.status(200).send({
+    //                             message: 'Task deleted successfully!',
+    //                             task_id: result.rows[0].task_id
+    //                         });
+    //                     })
+    //                     .catch(error => {
+    //                         res.status(500).send({
+    //                             message: 'Error while deleting task!',
+    //                             error
+    //                         });
+    //                     });
+    //             } else {
+    //                 res.status(401).send({
+    //                     message: 'You are not authorized to delete a task!'
+    //                 });
+    //             }
+    //         })
+    // });
 }
