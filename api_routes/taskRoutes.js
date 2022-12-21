@@ -353,15 +353,16 @@ module.exports = function (app, pool) {
 
 
     // remove a comment from a task
-    app.delete('/api/task/comment/:comment_id', (req, res) => {
+    app.delete('/api/task/comment/:comment_id/:user_id', (req, res) => {
         const comment_id = parseInt(req.params.comment_id);
+        const user_id = parseInt(req.params.user_id);
         
         pool.query(
             'SELECT is_admin FROM project_member INNER JOIN task ON project_member.project_id = task.project_id INNER JOIN task_comment ON task.task_id = task_comment.task_id WHERE task_comment.comment_id = $1 AND project_member.user_id = $2',
             [comment_id, req.user.user_id]
         )
             .then(result => {
-                if (result.rows[0].is_admin) {
+                if (result.rows[0].is_admin || user_id === req.user.user_id) {
                     pool.query(
                         'DELETE FROM task_comment WHERE comment_id = $1 RETURNING comment_id',
                         [comment_id]
