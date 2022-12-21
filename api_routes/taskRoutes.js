@@ -142,7 +142,7 @@ module.exports = function (app, pool) {
             .then(result => {
                 if (result.rows[0].is_admin) {
                     pool.query(
-                        'UPDATE task SET task_completed = true WHERE task_id = $1 RETURNING *',
+                        'UPDATE task SET task_completed_date = CURRENT_TIMESTAMP WHERE task_id = $1 RETURNING *',
                         [task_id]
                     )
                         .then(result => {
