@@ -203,7 +203,7 @@ module.exports = function (app, pool) {
             .then(result => {
                 if (result.rows[0].is_admin) {
                     pool.query(
-                        'INSERT INTO task_member (task_id, user_id) VALUES ($1, $2) RETURNING *',
+                        'INSERT INTO task_member (task_id, user_id) VALUES ($1, $2) RETURNING user_id',
                         [task_id, user_id]
                     )
                         .then(result => {
@@ -278,7 +278,7 @@ module.exports = function (app, pool) {
             .then(result => {
                 if (result.rows[0].is_admin) {
                     pool.query(
-                        'DELETE FROM task_member WHERE task_id = $1 AND user_id = $2 RETURNING *',
+                        'DELETE FROM task_member WHERE task_id = $1 AND user_id = $2 RETURNING user_id',
                         [task_id, user_id]
                     )
                         .then(result => {
