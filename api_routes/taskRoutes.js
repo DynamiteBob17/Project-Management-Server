@@ -176,6 +176,7 @@ module.exports = function (app, pool) {
             [task_id]
         )
             .then(result => {
+                result.rows.forEach(member => { delete member.password });
                 res.status(200).send({
                     message: 'Members retrieved successfully!',
                     members: result.rows
