@@ -333,7 +333,7 @@ module.exports = function (app, pool) {
         const task_id = parseInt(req.params.task_id);
         
         pool.query(
-            'SELECT comment_text, comment_date, username FROM task_comment INNER JOIN app_user ON task_comment.user_id = app_user.user_id WHERE task_id = $1',
+            'SELECT comment_text, comment_date, comment_id, username FROM task_comment INNER JOIN app_user ON task_comment.user_id = app_user.user_id WHERE task_id = $1',
             [task_id]
         )
             .then(result => {
