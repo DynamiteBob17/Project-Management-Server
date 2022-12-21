@@ -329,8 +329,8 @@ module.exports = function (app, pool) {
 
 
     // get all comments for a task
-    app.post('/api/task/comments', (req, res) => {
-        const { task_id } = req.body;
+    app.get('/api/task/comments/:task_id', (req, res) => {
+        const task_id = parseInt(req.params.task_id);
         
         pool.query(
             'SELECT * FROM task_comment WHERE task_id = $1',
