@@ -64,7 +64,7 @@ module.exports = function (app, pool) {
                                 email: user.email
                             },
                             'RANDOM_TOKEN',
-                            { expiresIn: '24h' }
+                            { expiresIn: '1h' }
                         );
 
                         res.status(200).send({
