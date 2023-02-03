@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/PickleEaterJim33/project-management-server.git"
+    "url": "git+https://github.com/DynamiteBob17/project-management-server.git"
   },
   "author": "PickleEaterJim33",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/PickleEaterJim33/project-management-server/issues"
+    "url": "https://github.com/DynamiteBob17/project-management-server/issues"
   },
-  "homepage": "https://github.com/PickleEaterJim33/project-management-server#readme",
+  "homepage": "https://github.com/DynamiteBob17/project-management-server#readme",
   "dependencies": {
     "bcrypt": "^5.1.0",
     "body-parser": "^1.20.1",
