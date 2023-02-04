@@ -1,9 +1,9 @@
+require('dotenv').config();
 const port = process.env.PORT || 5000;
 const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const cors = require('cors');
-const helmet = require('helmet');
 const routes = require('./api_routes/routes');
 
 app.use(bodyParser.json());
@@ -13,7 +13,6 @@ app.use(cors({
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(helmet());
 
 app.get('/', (req, res) => {
     res.status(200).send({ message: 'health check: api is up and running' });
