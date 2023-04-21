@@ -1,3 +1,4 @@
+require('dotenv').config();
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const auth = require('./auth');
@@ -63,7 +64,7 @@ module.exports = function (app, pool) {
                                 username: user.username,
                                 email: user.email
                             },
-                            'RANDOM_TOKEN',
+                            process.env.JWT_SECRET,
                             { expiresIn: '1h' }
                         );
 
