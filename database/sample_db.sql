@@ -1,10 +1,6 @@
 /*
     Inserted in Bash with the following command:
     PGPASSWORD=<password> psql -h <remote_host> -U <username> -d <database_name> -a -f ./database/sample_db.sql
-
-    - the command was run from the root of the project directory
-      before the app was deployed to Render.com and the database 
-      was also created on Render.com
 */
 
 CREATE TABLE IF NOT EXISTS app_user (

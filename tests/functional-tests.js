@@ -1,6 +1,4 @@
-// when testing, we will be using an AWS database
-
-// when deploying, we will be using the Render.com database
+// using different databases for testing and live environments
 
 /* 
     Ugh, there is just way too much to test for all the routes
