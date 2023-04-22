@@ -91,4 +91,34 @@ module.exports = function (app, pool) {
             });
     });
 
+	
+	
+    // remove a user
+    app.delete('/api/user', auth, (req, res) => {
+        const { user_id, username } = req.user;
+        
+        if (username === 'user1' || username === 'user2' || username === 'user3') {
+            res.status(500).send({
+                message: 'Cannot delete test users'
+            });
+        }
+
+        pool.query(
+            'DELETE FROM app_user WHERE user_id = $1',
+            [user_id]
+        )
+            .then(result => {
+                res.status(200).send({
+                    message: 'User deleted successfully!',
+                    username: username
+                });
+            })
+            .catch(error => {
+                res.status(500).send({
+                    message: 'Error while deleting user!',
+                    error
+                });
+            });
+    });
+
 }
