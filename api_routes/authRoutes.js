@@ -91,28 +91,4 @@ module.exports = function (app, pool) {
             });
     });
 
-
-
-    // remove a user
-    app.delete('/api/user', auth, (req, res) => {
-        const user_id = req.user.user_id;
-
-        pool.query(
-            'DELETE FROM app_user WHERE user_id = $1 RETURNING username',
-            [user_id]
-        )
-            .then(result => {
-                res.status(200).send({
-                    message: 'User deleted successfully!',
-                    username: result.rows[0].username
-                });
-            })
-            .catch(error => {
-                res.status(500).send({
-                    message: 'Error while deleting user!',
-                    error
-                });
-            });
-    });
-
 }
