@@ -98,7 +98,7 @@ module.exports = function (app, pool) {
         const { user_id, username } = req.user;
         
         if (username === 'user1' || username === 'user2' || username === 'user3') {
-            res.status(500).send({
+            return res.status(500).send({
                 message: 'Cannot delete test users'
             });
         }
