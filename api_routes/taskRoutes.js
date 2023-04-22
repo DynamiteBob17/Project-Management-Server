@@ -238,12 +238,16 @@ module.exports = function (app, pool) {
         )
             .then(result => {
                 if (result.rows[0].is_admin) {
-                    const values = user_ids.map(user_id => {
-                        return `(${task_id}, ${user_id})`;
+                    const parametersInQuery = [];
+                    const parameters = [];
+                    user_ids.forEach((user_id, index) => {
+                        parametersInQuery.push(`($${2 * (index + 1) - 1}, $${2 * (index + 1)})`);
+                        parameters.push(...[task_id, user_id]);
                     });
-                    const query = `INSERT INTO task_member (task_id, user_id) VALUES ${values.join(',')} RETURNING *`;
 
-                    pool.query(query)
+                    const query = `INSERT INTO task_member (task_id, user_id) VALUES ${parametersInQuery.join(', ')} RETURNING *`;
+
+                    pool.query(query, parameters)
                         .then(result => {
                             res.status(200).send({
                                 message: 'Members added to task successfully!',
