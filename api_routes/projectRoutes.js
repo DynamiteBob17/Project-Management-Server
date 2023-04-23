@@ -81,6 +81,36 @@ module.exports = function (app, pool) {
 
 
 
+    // get users not in a project
+    app.get('/api/project/non_members/:project_id', (req, res) => {
+        const project_id = parseInt(req.params.project_id);
+
+        pool.query(
+            `SELECT username
+            FROM app_user
+            EXCEPT
+            SELECT username
+            FROM app_user INNER JOIN project_member
+            ON app_user.user_id = project_member.user_id
+            WHERE project_id = $1`,
+            [project_id]
+        )
+            .then(result => {
+                res.status(200).send({
+                    message: 'Non-users retrieved successfully!',
+                    non_members: result.rows
+                });
+            })
+            .catch(error => {
+                res.status(500).send({
+                    message: 'Error while retrieving non-users!',
+                    error
+                });
+            });
+    });
+
+
+
     // add a user to a project
     app.put('/api/project/member', (req, res) => {
         const { project_id, username } = req.body;
@@ -122,7 +152,7 @@ module.exports = function (app, pool) {
                         })
                         .catch(error => {
                             res.status(500).send({
-                                message: 'Error while adding user to project!',
+                                message: 'User does not exist!',
                                 error
                             });
                         });
