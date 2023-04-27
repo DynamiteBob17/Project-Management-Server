@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS task (
     task_description VARCHAR(256) NOT NULL,
     task_status VARCHAR(32) NOT NULL DEFAULT 'Open',
     task_priority VARCHAR(32) NOT NULL,
-    task_due_date TIMESTAMP,
+    task_due_date TIMESTAMPTZ,
     task_created_date TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     task_completed_date TIMESTAMPTZ ,
     project_id INT NOT NULL,
